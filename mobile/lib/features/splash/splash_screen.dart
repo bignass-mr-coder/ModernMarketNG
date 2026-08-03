@@ -1,7 +1,29 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import '../welcome/welcome_screen.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    Timer(const Duration(seconds: 3), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const WelcomeScreen(),
+        ),
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -10,7 +32,7 @@ class SplashScreen extends StatelessWidget {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: const [
             Icon(
               Icons.storefront,
               size: 100,
@@ -18,7 +40,7 @@ class SplashScreen extends StatelessWidget {
             ),
             SizedBox(height: 20),
             Text(
-              'Modern Market NG',
+              "Modern Market NG",
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
@@ -28,9 +50,6 @@ class SplashScreen extends StatelessWidget {
             SizedBox(height: 10),
             Text(
               "Nigeria's Local Digital Marketplace",
-              style: TextStyle(
-                fontSize: 16,
-              ),
             ),
             SizedBox(height: 40),
             CircularProgressIndicator(),
