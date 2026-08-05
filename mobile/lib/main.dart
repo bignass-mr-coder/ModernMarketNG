@@ -3,5 +3,5 @@ import 'app/app.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ModernMarketNGApp());
+  runApp(const ModernMarketApp());
 }
