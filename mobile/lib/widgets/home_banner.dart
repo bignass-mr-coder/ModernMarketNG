@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/core/theme/app_colors.dart';
-import 'package:mobile/core/theme/app_text_styles.dart';
 
 class HomeBanner extends StatelessWidget {
   const HomeBanner({super.key});
@@ -14,19 +13,9 @@ class HomeBanner extends StatelessWidget {
         color: AppColors.primary,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text(
-            'Welcome 👋',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-            ),
-          ),
-
-          SizedBox(height: 8),
-
+        children: [
           Text(
             'Find Everything You Need',
             style: TextStyle(
@@ -35,9 +24,7 @@ class HomeBanner extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-
           SizedBox(height: 10),
-
           Text(
             'Buy and sell products anywhere in Nigeria.',
             style: TextStyle(

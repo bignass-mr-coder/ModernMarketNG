@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/widgets/category_card.dart';
+import 'package:mobile/widgets/product_card.dart';
 
-class HomeCategories extends StatelessWidget {
-  const HomeCategories({super.key});
+class FeaturedProducts extends StatelessWidget {
+  const FeaturedProducts({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -10,7 +10,7 @@ class HomeCategories extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Popular Categories',
+          'Featured Products',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -23,31 +23,27 @@ class HomeCategories extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 1.1,
+          childAspectRatio: 0.75,
           children: const [
-            CategoryCard(
+            ProductCard(
+              name: 'Morocco Kaftan',
+              price: '₦25,000',
               icon: Icons.checkroom,
-              title: 'Fashion',
             ),
-            CategoryCard(
-              icon: Icons.phone_android,
-              title: 'Electronics',
+            ProductCard(
+              name: 'iPhone 13',
+              price: '₦650,000',
+              icon: Icons.phone_iphone,
             ),
-            CategoryCard(
-              icon: Icons.directions_car,
-              title: 'Vehicles',
+            ProductCard(
+              name: 'Laptop',
+              price: '₦420,000',
+              icon: Icons.laptop,
             ),
-            CategoryCard(
+            ProductCard(
+              name: 'Office Chair',
+              price: '₦55,000',
               icon: Icons.chair,
-              title: 'Furniture',
-            ),
-            CategoryCard(
-              icon: Icons.restaurant,
-              title: 'Food',
-            ),
-            CategoryCard(
-              icon: Icons.computer,
-              title: 'Computers',
             ),
           ],
         ),

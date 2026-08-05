@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/widgets/home_banner.dart';
 import 'package:mobile/widgets/search_bar_widget.dart';
 import 'package:mobile/widgets/home_categories.dart';
-
+import 'package:mobile/widgets/featured_products.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -16,17 +16,21 @@ class HomeScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            HomeBanner(),
+         children: [
+  HomeBanner(),
 
-            SizedBox(height: 20),
+  SizedBox(height: 20),
 
-            SearchBarWidget(),
+  SearchBarWidget(),
 
-            SizedBox(height: 24),
+  SizedBox(height: 24),
 
-            HomeCategories(),
-          ],
+  HomeCategories(),
+
+  SizedBox(height: 24),
+
+  FeaturedProducts(),
+],
         ),
       ),
     );
