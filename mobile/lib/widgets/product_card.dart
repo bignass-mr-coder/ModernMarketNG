@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 
 class ProductCard extends StatelessWidget {
+  final String image;
   final String name;
   final String price;
-  final IconData icon;
+  final double rating;
 
   const ProductCard({
     super.key,
+    required this.image,
     required this.name,
     required this.price,
-    required this.icon,
+    required this.rating,
   });
 
   @override
@@ -17,46 +19,73 @@ class ProductCard extends StatelessWidget {
     return Card(
       elevation: 3,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: Icon(
+                Icons.favorite_border,
+                color: Colors.red,
+              ),
+            ),
+
             Expanded(
               child: Center(
-                child: Icon(
-                  icon,
-                  size: 70,
-                  color: Colors.blue,
+                child: Image.asset(
+                  image,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
-            const SizedBox(height: 10),
+
+            const SizedBox(height: 8),
+
             Text(
               name,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 18,
+                fontSize: 16,
               ),
             ),
-            const SizedBox(height: 6),
+
+            const SizedBox(height: 4),
+
+            Row(
+              children: [
+                const Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                  size: 18,
+                ),
+                const SizedBox(width: 4),
+                Text(rating.toString()),
+              ],
+            ),
+
+            const SizedBox(height: 4),
+
             Text(
               price,
               style: const TextStyle(
                 color: Colors.green,
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 18,
               ),
             ),
-            const SizedBox(height: 10),
-            const Row(
-              children: [
-                Icon(Icons.star, color: Colors.orange, size: 18),
-                SizedBox(width: 4),
-                Text("4.8"),
-              ],
+
+            const SizedBox(height: 8),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {},
+                child: const Text("Add to Cart"),
+              ),
             ),
           ],
         ),
