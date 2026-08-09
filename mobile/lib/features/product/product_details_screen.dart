@@ -5,6 +5,11 @@ import 'package:mobile/widgets/product_gallery.dart';
 import 'package:mobile/widgets/product_delivery_card.dart';
 import 'package:mobile/widgets/product_specifications.dart';
 import 'package:mobile/widgets/product_reviews.dart';
+import 'package:provider/provider.dart';
+import 'package:mobile/models/cart_item.dart';
+import 'package:mobile/managers/cart_manager.dart';
+import 'package:mobile/features/cart/cart_screen.dart';
+
 class ProductDetailsScreen extends StatefulWidget {
   final String name;
   final String price;
@@ -33,8 +38,19 @@ class _ProductDetailsScreenState
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.name),
-        actions: const [
-          Padding(
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CartScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.shopping_cart_outlined),
+          ),
+          const Padding(
             padding: EdgeInsets.only(right: 16),
             child: Icon(Icons.favorite_border),
           ),
@@ -45,48 +61,47 @@ class _ProductDetailsScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             ProductInfo(
-  name: widget.name,
-  price: widget.price,
-  rating: widget.rating,
-),
+              name: widget.name,
+              price: widget.price,
+              rating: widget.rating,
+            ),
 
-const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-ProductGallery(
-  image: widget.image,
-  heroTag: widget.name,
-),
+            ProductGallery(
+              image: widget.image,
+              heroTag: widget.name,
+            ),
 
             const SizedBox(height: 25),
 
-           const SellerCard(),
-           
-const SizedBox(height: 24),
+            const SellerCard(),
 
-const ProductDeliveryCard(),
+            const SizedBox(height: 24),
 
-const SizedBox(height: 24),
+            const ProductDeliveryCard(),
 
-const ProductSpecifications(),
+            const SizedBox(height: 24),
 
-const SizedBox(height: 24),
+            const ProductSpecifications(),
 
-ProductReviews(),
+            const SizedBox(height: 24),
 
-const SizedBox(height: 24),
+            const ProductReviews(),
 
-const Padding(
-  padding: EdgeInsets.symmetric(horizontal: 20),
-  child: Text(
-    "Description",
-    style: TextStyle(
-      fontSize: 22,
-      fontWeight: FontWeight.bold,
-    ),
-  ),
-),
+            const SizedBox(height: 24),
+
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                "Description",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
 
             const Padding(
               padding: EdgeInsets.all(20),
@@ -112,7 +127,6 @@ const Padding(
 
             Row(
               children: [
-
                 IconButton(
                   onPressed: () {
                     if (quantity > 1) {
@@ -121,7 +135,10 @@ const Padding(
                       });
                     }
                   },
-                  icon: const Icon(Icons.remove_circle, size: 30),
+                  icon: const Icon(
+                    Icons.remove_circle,
+                    size: 30,
+                  ),
                 ),
 
                 Text(
@@ -138,7 +155,10 @@ const Padding(
                       quantity++;
                     });
                   },
-                  icon: const Icon(Icons.add_circle, size: 30),
+                  icon: const Icon(
+                    Icons.add_circle,
+                    size: 30,
+                  ),
                 ),
               ],
             ),
@@ -149,7 +169,23 @@ const Padding(
                 width: double.infinity,
                 height: 55,
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    final cartItem = CartItem(
+                      productId: widget.name,
+                      productName: widget.name,
+                      price: widget.price,
+                      image: widget.image,
+                      quantity: quantity,
+                    );
+
+                    context.read<CartManager>().addItem(cartItem);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Added to cart'),
+                      ),
+                    );
+                  },
                   icon: const Icon(Icons.shopping_cart),
                   label: const Text("Add to Cart"),
                 ),

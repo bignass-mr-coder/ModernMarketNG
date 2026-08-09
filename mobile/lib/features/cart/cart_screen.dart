@@ -1,0 +1,224 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:mobile/managers/cart_manager.dart';
+import 'package:mobile/models/cart_item.dart';
+
+class CartScreen extends StatelessWidget {
+  const CartScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('My Cart'),
+      ),
+      body: Consumer<CartManager>(
+        builder: (context, cartManager, child) {
+          if (cartManager.items.isEmpty) {
+            return const Center(
+              child: Text(
+                'Your cart is empty',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            );
+          }
+
+          return Column(
+            children: [
+              Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: cartManager.items.length,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final item = cartManager.items[index];
+
+                    return _CartItemCard(item: item);
+                  },
+                ),
+              ),
+
+              _CartSummary(cartManager: cartManager),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _CartItemCard extends StatelessWidget {
+  const _CartItemCard({
+    required this.item,
+  });
+
+  final CartItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final cartManager = context.read<CartManager>();
+
+    return Card(
+      elevation: 0,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                item.image,
+                width: 90,
+                height: 90,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    width: 90,
+                    height: 90,
+                    color: Colors.grey.shade200,
+                    child: const Icon(
+                      Icons.image_not_supported_outlined,
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.productName,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  Text(
+                    item.price,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          cartManager.decreaseQuantity(
+                            item.productId,
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.remove_circle_outline,
+                        ),
+                      ),
+
+                      Text(
+                        item.quantity.toString(),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      IconButton(
+                        onPressed: () {
+                          cartManager.increaseQuantity(
+                            item.productId,
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.add_circle_outline,
+                        ),
+                      ),
+
+                      const Spacer(),
+
+                      IconButton(
+                        onPressed: () {
+                          cartManager.removeItem(
+                            item.productId,
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.delete_outline,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CartSummary extends StatelessWidget {
+  const _CartSummary({
+    required this.cartManager,
+  });
+
+  final CartManager cartManager;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(
+          top: BorderSide(
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Items: ${cartManager.totalQuantity}',
+            style: const TextStyle(
+              fontSize: 16,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: FilledButton(
+              onPressed: () {},
+              child: const Text(
+                'Proceed to Checkout',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
