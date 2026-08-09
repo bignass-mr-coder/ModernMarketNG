@@ -14,6 +14,19 @@ class CartManager extends ChangeNotifier {
       (total, item) => total + item.quantity,
     );
   }
+  double get subtotal {
+  return _items.fold(
+    0,
+    (total, item) {
+      final price = double.tryParse(
+            item.price.replaceAll(RegExp(r'[^0-9.]'), ''),
+          ) ??
+          0;
+
+      return total + (price * item.quantity);
+    },
+  );
+}
 
   void addItem(CartItem item) {
     final existingIndex = _items.indexWhere(

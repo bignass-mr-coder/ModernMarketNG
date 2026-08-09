@@ -43,7 +43,99 @@ class CartScreen extends StatelessWidget {
                 ),
               ),
 
-              _CartSummary(cartManager: cartManager),
+              // Order Summary
+              const Padding(
+                padding: EdgeInsets.all(20),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Order Summary',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Subtotal'),
+                    Text(
+                      '₦${cartManager.subtotal.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Delivery Fee'),
+                    Text(
+                      '₦1,500.00',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const Divider(
+                height: 24,
+              ),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Total',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '₦${(cartManager.subtotal + 1500).toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: FilledButton(
+                    onPressed: () {},
+                    child: const Text(
+                      'Proceed to Checkout',
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
             ],
           );
         },
@@ -113,7 +205,9 @@ class _CartItemCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary,
                     ),
                   ),
 
@@ -170,54 +264,6 @@ class _CartItemCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _CartSummary extends StatelessWidget {
-  const _CartSummary({
-    required this.cartManager,
-  });
-
-  final CartManager cartManager;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: Border(
-          top: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant,
-          ),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Items: ${cartManager.totalQuantity}',
-            style: const TextStyle(
-              fontSize: 16,
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: FilledButton(
-              onPressed: () {},
-              child: const Text(
-                'Proceed to Checkout',
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
