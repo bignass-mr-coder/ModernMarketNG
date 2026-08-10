@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:mobile/features/checkout/checkout_screen.dart';
 import 'package:mobile/managers/cart_manager.dart';
 import 'package:mobile/models/cart_item.dart';
 
@@ -127,11 +127,18 @@ class CartScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 52,
                   child: FilledButton(
-                    onPressed: () {},
-                    child: const Text(
-                      'Proceed to Checkout',
-                    ),
-                  ),
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CheckoutScreen(),
+      ),
+    );
+  },
+  child: const Text(
+    'Proceed to Checkout',
+  ),
+),
                 ),
               ),
 
