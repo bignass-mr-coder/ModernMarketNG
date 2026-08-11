@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'package:mobile/models/order.dart';
 import 'package:mobile/features/checkout/order_confirmation_screen.dart';
 import 'package:mobile/managers/cart_manager.dart';
+import 'package:mobile/managers/order_manager.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -187,34 +189,46 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     height: 54,
                     child: FilledButton(
                       onPressed: () {
-  final orderId =
-      'MMNG-${DateTime.now().millisecondsSinceEpoch}';
+                        final orderId =
+                            'MMNG-${DateTime.now().millisecondsSinceEpoch}';
 
-  final order = Order(
-    id: orderId,
-    customerName: _nameController.text.trim(),
-    phoneNumber: _phoneController.text.trim(),
-    address: _addressController.text.trim(),
-    deliveryMethod: _selectedDeliveryMethod,
-    paymentMethod: _selectedPaymentMethod,
-    items: List.from(cartManager.items),
-    subtotal: cartManager.subtotal,
-    deliveryFee: _deliveryFee,
-    total: total,
-    createdAt: DateTime.now(),
-  );
+                        final order = Order(
+                          id: orderId,
+                          customerName:
+                              _nameController.text.trim(),
+                          phoneNumber:
+                              _phoneController.text.trim(),
+                          address:
+                              _addressController.text.trim(),
+                          deliveryMethod:
+                              _selectedDeliveryMethod,
+                          paymentMethod:
+                              _selectedPaymentMethod,
+                          items: List.from(cartManager.items),
+                          subtotal: cartManager.subtotal,
+                          deliveryFee: _deliveryFee,
+                          total: total,
+                          createdAt: DateTime.now(),
+                        );
 
-  Navigator.pop(context);
+                        // Save the order in OrderManager.
+                        final orderManager =
+                            context.read<OrderManager>();
 
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => OrderConfirmationScreen(
-        orderId: order.id,
-      ),
-    ),
-  );
-},
+                        orderManager.addOrder(order);
+
+                        Navigator.pop(context);
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                OrderConfirmationScreen(
+                              orderId: order.id,
+                            ),
+                          ),
+                        );
+                      },
                       child: const Text(
                         'Place Order',
                         style: TextStyle(
@@ -248,7 +262,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // DELIVERY INFORMATION
               const Text(
                 'Delivery Information',
                 style: TextStyle(
@@ -268,9 +281,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                 ),
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
+                  if (value == null ||
+                      value.trim().isEmpty) {
                     return 'Please enter your full name';
                   }
+
                   return null;
                 },
               ),
@@ -287,9 +302,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                 ),
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
+                  if (value == null ||
+                      value.trim().isEmpty) {
                     return 'Please enter your phone number';
                   }
+
                   return null;
                 },
               ),
@@ -300,23 +317,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 controller: _addressController,
                 decoration: InputDecoration(
                   labelText: 'Delivery Address',
-                  hintText: 'Enter your full delivery address',
+                  hintText:
+                      'Enter your full delivery address',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 maxLines: 3,
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
+                  if (value == null ||
+                      value.trim().isEmpty) {
                     return 'Please enter your delivery address';
                   }
+
                   return null;
                 },
               ),
 
               const SizedBox(height: 28),
 
-              // DELIVERY METHOD
               const Text(
                 'Delivery Method',
                 style: TextStyle(
@@ -361,7 +380,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
               const SizedBox(height: 28),
 
-              // PAYMENT METHOD
               const Text(
                 'Payment Method',
                 style: TextStyle(
@@ -450,14 +468,16 @@ class _SummaryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment:
+          MainAxisAlignment.spaceBetween,
       children: [
         Text(
           title,
           style: TextStyle(
             fontSize: isTotal ? 19 : 16,
-            fontWeight:
-                isTotal ? FontWeight.bold : FontWeight.w500,
+            fontWeight: isTotal
+                ? FontWeight.bold
+                : FontWeight.w500,
           ),
         ),
         Text(
