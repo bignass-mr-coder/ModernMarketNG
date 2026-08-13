@@ -1,14 +1,60 @@
-import 'package:flutter/foundation.dart';
+import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:mobile/models/order.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderManager extends ChangeNotifier {
+  static const String _ordersKey = 'orders';
+
   final List<Order> _orders = [];
 
   List<Order> get orders => List.unmodifiable(_orders);
 
-  void addOrder(Order order) {
+  int get orderCount => _orders.length;
+
+  Future<void> loadOrders() async {
+    final preferences = await SharedPreferences.getInstance();
+
+    final savedOrders = preferences.getStringList(_ordersKey);
+
+    if (savedOrders == null || savedOrders.isEmpty) {
+      return;
+    }
+
+    _orders
+      ..clear()
+      ..addAll(
+        savedOrders.map(
+          (order) => Order.fromMap(
+            jsonDecode(order) as Map<String, dynamic>,
+          ),
+        ),
+      );
+
+    notifyListeners();
+  }
+
+  Future<void> _saveOrders() async {
+    final preferences = await SharedPreferences.getInstance();
+
+    final savedOrders = _orders
+        .map(
+          (order) => jsonEncode(order.toMap()),
+        )
+        .toList();
+
+    await preferences.setStringList(
+      _ordersKey,
+      savedOrders,
+    );
+  }
+
+  Future<void> addOrder(Order order) async {
     _orders.insert(0, order);
+
+    await _saveOrders();
+
     notifyListeners();
   }
 
@@ -22,15 +68,17 @@ class OrderManager extends ChangeNotifier {
     return null;
   }
 
-  void updateOrderStatus(
+  Future<void> updateOrderStatus(
     String orderId,
     String newStatus,
-  ) {
+  ) async {
     final index = _orders.indexWhere(
       (order) => order.id == orderId,
     );
 
-    if (index == -1) return;
+    if (index == -1) {
+      return;
+    }
 
     final oldOrder = _orders[index];
 
@@ -49,11 +97,16 @@ class OrderManager extends ChangeNotifier {
       status: newStatus,
     );
 
+    await _saveOrders();
+
     notifyListeners();
   }
 
-  void clearOrders() {
+  Future<void> clearOrders() async {
     _orders.clear();
+
+    await _saveOrders();
+
     notifyListeners();
   }
 }

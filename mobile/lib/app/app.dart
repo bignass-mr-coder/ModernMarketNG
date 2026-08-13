@@ -17,8 +17,8 @@ class ModernMarketApp extends StatelessWidget {
     create: (_) => CartManager(),
   ),
   ChangeNotifierProvider(
-    create: (_) => OrderManager(),
-  ),
+  create: (_) => OrderManager()..loadOrders(),
+),
   ChangeNotifierProvider(
     create: (_) => SellerManager(),
   ),

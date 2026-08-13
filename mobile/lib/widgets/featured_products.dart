@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:mobile/managers/product_manager.dart';
+import 'package:mobile/models/product.dart';
 import 'package:mobile/widgets/product_card.dart';
 
 class FeaturedProducts extends StatelessWidget {
@@ -6,6 +10,8 @@ class FeaturedProducts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final products = context.watch<ProductManager>().products;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -16,47 +22,69 @@ class FeaturedProducts extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
+
         const SizedBox(height: 16),
 
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 0.68,
-          children: const [
-
-            ProductCard(
-              image: 'assets/images/kaftan.jpg',
-              name: 'Morocco Kaftan',
-              price: '₦25,000',
-              rating: 4.8,
+        if (products.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 30),
+            child: Center(
+              child: Text(
+                'No products available yet.',
+                style: TextStyle(
+                  fontSize: 16,
+                ),
+              ),
             ),
-
-            ProductCard(
-              image: 'assets/images/iphone13.jpg',
-              name: 'iPhone 13',
-              price: '₦650,000',
-              rating: 4.9,
+          )
+        else
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate:
+                const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.68,
             ),
+            itemCount: products.length,
+            itemBuilder: (context, index) {
+              final Product product = products[index];
 
-            ProductCard(
-              image: 'assets/images/laptop.jpg',
-              name: 'Laptop',
-              price: '₦420,000',
-              rating: 4.7,
-            ),
-
-            ProductCard(
-              image: 'assets/images/chair.jpg',
-              name: 'Office Chair',
-              price: '₦55,000',
-              rating: 3.8,
-            ),
-          ],
-        ),
+              return ProductCard(
+                product: product,
+                image: _imageForCategory(product.category),
+                rating: 4.8,
+              );
+            },
+          ),
       ],
     );
+  }
+
+  String _imageForCategory(String category) {
+    switch (category) {
+      case 'Fashion':
+        return 'assets/images/kaftan.jpg';
+
+      case 'Electronics':
+        return 'assets/images/iphone13.jpg';
+
+      case 'Food':
+        return 'assets/images/food.jpg';
+
+      case 'Beauty':
+        return 'assets/images/beauty.jpg';
+
+      case 'Home':
+        return 'assets/images/chair.jpg';
+
+      case 'Agriculture':
+        return 'assets/images/agriculture.jpg';
+
+      default:
+        return 'assets/images/kaftan.jpg';
+    }
   }
 }

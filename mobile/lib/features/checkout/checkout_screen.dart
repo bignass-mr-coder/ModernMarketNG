@@ -188,7 +188,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     width: double.infinity,
                     height: 54,
                     child: FilledButton(
-                      onPressed: () {
+                      onPressed: () async {
                         final orderId =
                             'MMNG-${DateTime.now().millisecondsSinceEpoch}';
 
@@ -215,10 +215,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         final orderManager =
                             context.read<OrderManager>();
 
-                        orderManager.addOrder(order);
+                        await orderManager.addOrder(order);
 
-                        Navigator.pop(context);
+if (!context.mounted) {
+  return;
+}
 
+Navigator.pop(context);
                         Navigator.push(
                           context,
                           MaterialPageRoute(

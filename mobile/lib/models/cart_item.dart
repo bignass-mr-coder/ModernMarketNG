@@ -28,4 +28,24 @@ class CartItem {
       quantity: quantity ?? this.quantity,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'productId': productId,
+      'productName': productName,
+      'price': price,
+      'image': image,
+      'quantity': quantity,
+    };
+  }
+
+  factory CartItem.fromMap(Map<String, dynamic> map) {
+    return CartItem(
+      productId: map['productId'] as String,
+      productName: map['productName'] as String,
+      price: map['price'] as String,
+      image: map['image'] as String,
+      quantity: map['quantity'] as int,
+    );
+  }
 }

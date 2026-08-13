@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/features/product/product_details_screen.dart';
+import 'package:mobile/models/product.dart';
 
 class ProductCard extends StatelessWidget {
+  final Product product;
   final String image;
-  final String name;
-  final String price;
   final double rating;
 
   const ProductCard({
     super.key,
+    required this.product,
     required this.image,
-    required this.name,
-    required this.price,
-    required this.rating,
+    this.rating = 4.8,
   });
 
   @override
@@ -24,8 +23,7 @@ class ProductCard extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (_) => ProductDetailsScreen(
-              name: name,
-              price: price,
+              product: product,
               image: image,
               rating: rating,
             ),
@@ -42,7 +40,7 @@ class ProductCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Align(
+              const Align(
                 alignment: Alignment.topRight,
                 child: Icon(
                   Icons.favorite_border,
@@ -62,7 +60,9 @@ class ProductCard extends StatelessWidget {
               const SizedBox(height: 8),
 
               Text(
-                name,
+                product.name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -86,7 +86,7 @@ class ProductCard extends StatelessWidget {
               const SizedBox(height: 4),
 
               Text(
-                price,
+                '₦${product.price.toStringAsFixed(2)}',
                 style: const TextStyle(
                   color: Colors.green,
                   fontWeight: FontWeight.bold,
@@ -99,8 +99,19 @@ class ProductCard extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
-                  child: const Text("Add to Cart"),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProductDetailsScreen(
+                          product: product,
+                          image: image,
+                          rating: rating,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('View Product'),
                 ),
               ),
             ],
