@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:mobile/features/orders/orders_screen.dart';
+import 'package:mobile/features/seller/seller_dashboard_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -36,6 +37,7 @@ class ProfileScreen extends StatelessWidget {
 
           const SizedBox(height: 30),
 
+          // MY ORDERS
           Card(
             child: ListTile(
               leading: const Icon(
@@ -58,6 +60,37 @@ class ProfileScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (_) => const OrdersScreen(),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // SELLER CENTER
+          Card(
+            child: ListTile(
+              leading: const Icon(
+                Icons.storefront_outlined,
+              ),
+              title: const Text(
+                'Seller Center',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: const Text(
+                'Manage your products and orders',
+              ),
+              trailing: const Icon(
+                Icons.chevron_right,
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SellerDashboardScreen(),
                   ),
                 );
               },
