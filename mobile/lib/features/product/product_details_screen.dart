@@ -11,7 +11,7 @@ import 'package:mobile/widgets/product_info.dart';
 import 'package:mobile/widgets/product_reviews.dart';
 import 'package:mobile/widgets/product_specifications.dart';
 import 'package:mobile/widgets/seller_card.dart';
-
+import 'package:mobile/features/checkout/checkout_screen.dart';
 class ProductDetailsScreen extends StatefulWidget {
   final Product product;
   final String image;
@@ -249,25 +249,43 @@ class _ProductDetailsScreenState
             ),
 
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-              ),
-              child: SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: FilledButton.icon(
-                  onPressed: product.stockQuantity <= 0
-                      ? null
-                      : () {},
-                  icon: const Icon(
-                    Icons.flash_on,
-                  ),
-                  label: const Text(
-                    'Buy Now',
+  padding: const EdgeInsets.symmetric(
+    horizontal: 20,
+  ),
+  child: SizedBox(
+    width: double.infinity,
+    height: 55,
+    child: FilledButton.icon(
+      onPressed: product.stockQuantity <= 0
+          ? null
+          : () {
+              final buyNowItem = CartItem(
+                productId: product.id,
+                productName: product.name,
+                price:
+                    '₦${product.price.toStringAsFixed(2)}',
+                image: widget.image,
+                quantity: quantity,
+              );
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CheckoutScreen(
+                    buyNowItem: buyNowItem,
                   ),
                 ),
-              ),
-            ),
+              );
+            },
+      icon: const Icon(
+        Icons.flash_on,
+      ),
+      label: const Text(
+        'Buy Now',
+      ),
+    ),
+  ),
+),
 
             const SizedBox(height: 40),
           ],

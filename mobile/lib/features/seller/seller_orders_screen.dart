@@ -5,8 +5,8 @@ import 'package:mobile/features/orders/order_details_screen.dart';
 import 'package:mobile/managers/order_manager.dart';
 import 'package:mobile/models/order.dart';
 
-class OrdersScreen extends StatelessWidget {
-  const OrdersScreen({super.key});
+class SellerOrdersScreen extends StatelessWidget {
+  const SellerOrdersScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class OrdersScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Orders'),
+        title: const Text('Seller Orders'),
       ),
       body: orders.isEmpty
           ? const Center(
@@ -35,7 +35,7 @@ class OrdersScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'Your placed orders will appear here.',
+                    'Customer orders will appear here.',
                   ),
                 ],
               ),
@@ -44,19 +44,21 @@ class OrdersScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               itemCount: orders.length,
               separatorBuilder: (_, _) =>
-    const SizedBox(height: 12),
+                  const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final order = orders[index];
 
-                return _OrderCard(order: order);
+                return _SellerOrderCard(
+                  order: order,
+                );
               },
             ),
     );
   }
 }
 
-class _OrderCard extends StatelessWidget {
-  const _OrderCard({
+class _SellerOrderCard extends StatelessWidget {
+  const _SellerOrderCard({
     required this.order,
   });
 
@@ -69,16 +71,12 @@ class _OrderCard extends StatelessWidget {
     switch (status) {
       case 'Confirmed':
         return Colors.blue;
-
       case 'Shipped':
         return Colors.orange;
-
       case 'Delivered':
         return Colors.green;
-
       case 'Cancelled':
         return Colors.red;
-
       case 'Pending':
       default:
         return Theme.of(context).colorScheme.primary;
@@ -109,144 +107,97 @@ class _OrderCard extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (_) => OrderDetailsScreen(
-                order: order,
-              ),
+  order: order,
+  isSeller: true,
+),
             ),
           );
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ORDER HEADER
               Row(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
                 children: [
                   const Expanded(
                     child: Text(
-                      'Order',
+                      'Customer Order',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-
-                  Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        order.id,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(
+                        alpha: 0.12,
                       ),
-
-                      const SizedBox(height: 6),
-
-                      // STATUS BADGE
-                      Container(
-                        padding:
-                            const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: statusColor.withValues(
-                            alpha: 0.12,
-                          ),
-                          borderRadius:
-                              BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          order.status,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: statusColor,
-                          ),
-                        ),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      order.status,
+                      style: TextStyle(
+                        color: statusColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
 
               Text(
-                _formatDate(order.createdAt),
+                'Order ID: ${order.id}',
                 style: TextStyle(
-                  fontSize: 13,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+
+              const SizedBox(height: 6),
+
+              Text(
+                'Date: ${_formatDate(order.createdAt)}',
+                style: TextStyle(
                   color: Theme.of(context)
                       .colorScheme
                       .onSurfaceVariant,
                 ),
               ),
 
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
 
-              // ITEMS
-              Row(
-                children: [
-                  const Icon(
-                    Icons.inventory_2_outlined,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${order.items.length} item(s)',
-                  ),
-                ],
+              Text(
+                'Customer: ${order.customerName}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
 
-              // DELIVERY
-              Row(
-                children: [
-                  const Icon(
-                    Icons.local_shipping_outlined,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      order.deliveryMethod,
-                    ),
-                  ),
-                ],
+              Text(
+                'Phone: ${order.phoneNumber}',
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
 
-              // PAYMENT
-              Row(
-                children: [
-                  const Icon(
-                    Icons.payment_outlined,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      order.paymentMethod,
-                    ),
-                  ),
-                ],
+              Text(
+                'Items: ${order.items.length}',
               ),
 
               const Divider(height: 24),
 
-              // TOTAL
               Row(
                 mainAxisAlignment:
                     MainAxisAlignment.spaceBetween,
@@ -254,29 +205,28 @@ class _OrderCard extends StatelessWidget {
                   const Text(
                     'Total',
                     style: TextStyle(
-                      fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
                   ),
                   Text(
                     '₦${order.total.toStringAsFixed(2)}',
                     style: const TextStyle(
-                      fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      fontSize: 18,
                     ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
 
-              // VIEW DETAILS
               Row(
                 mainAxisAlignment:
                     MainAxisAlignment.end,
                 children: [
                   Text(
-                    'View Details',
+                    'View Order',
                     style: TextStyle(
                       color: Theme.of(context)
                           .colorScheme

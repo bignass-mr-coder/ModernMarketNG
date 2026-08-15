@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:mobile/models/cart_item.dart';
 import 'package:mobile/models/order.dart';
 import 'package:mobile/features/checkout/order_confirmation_screen.dart';
 import 'package:mobile/managers/cart_manager.dart';
 import 'package:mobile/managers/order_manager.dart';
 
 class CheckoutScreen extends StatefulWidget {
-  const CheckoutScreen({super.key});
+  final CartItem? buyNowItem;
+
+  const CheckoutScreen({
+    super.key,
+    this.buyNowItem,
+  });
 
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
@@ -23,12 +29,42 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String _selectedDeliveryMethod = 'Standard Delivery';
   String _selectedPaymentMethod = 'Cash on Delivery';
 
+  List<CartItem> get _checkoutItems {
+    final buyNowItem = widget.buyNowItem;
+
+    if (buyNowItem != null) {
+      return [buyNowItem];
+    }
+
+    return context.read<CartManager>().items;
+  }
+
   double get _deliveryFee {
     if (_selectedDeliveryMethod == 'Express Delivery') {
       return 3000;
     }
 
     return 1500;
+  }
+
+  double _priceToDouble(String price) {
+    return double.parse(
+      price
+          .replaceAll('₦', '')
+          .replaceAll(',', '')
+          .trim(),
+    );
+  }
+
+  double get _checkoutSubtotal {
+    final buyNowItem = widget.buyNowItem;
+
+    if (buyNowItem != null) {
+      return _priceToDouble(buyNowItem.price) *
+          buyNowItem.quantity;
+    }
+
+    return context.read<CartManager>().subtotal;
   }
 
   @override
@@ -46,15 +82,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void _showOrderReview() {
-    final cartManager = context.read<CartManager>();
+    final checkoutItems = _checkoutItems;
+    final subtotal = _checkoutSubtotal;
+    final total = subtotal + _deliveryFee;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (context) {
-        final total = cartManager.subtotal + _deliveryFee;
-
+      builder: (sheetContext) {
         return SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -82,24 +118,31 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
                   const SizedBox(height: 12),
 
-                  ...cartManager.items.map(
+                  ...checkoutItems.map(
                     (item) => Card(
                       child: ListTile(
                         leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius:
+                              BorderRadius.circular(8),
                           child: Image.network(
                             item.image,
                             width: 55,
                             height: 55,
                             fit: BoxFit.cover,
                             errorBuilder:
-                                (context, error, stackTrace) {
+                                (
+                              context,
+                              error,
+                              stackTrace,
+                            ) {
                               return Container(
                                 width: 55,
                                 height: 55,
-                                color: Colors.grey.shade200,
+                                color:
+                                    Colors.grey.shade200,
                                 child: const Icon(
-                                  Icons.image_not_supported_outlined,
+                                  Icons
+                                      .image_not_supported_outlined,
                                 ),
                               );
                             },
@@ -108,7 +151,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         title: Text(
                           item.productName,
                           maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          overflow:
+                              TextOverflow.ellipsis,
                         ),
                         subtitle: Text(
                           'Quantity: ${item.quantity}',
@@ -116,7 +160,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         trailing: Text(
                           item.price,
                           style: const TextStyle(
-                            fontWeight: FontWeight.bold,
+                            fontWeight:
+                                FontWeight.bold,
                           ),
                         ),
                       ),
@@ -137,7 +182,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text(_selectedDeliveryMethod),
+                    title: Text(
+                      _selectedDeliveryMethod,
+                    ),
                     subtitle: Text(
                       _addressController.text,
                     ),
@@ -156,7 +203,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   _SummaryRow(
                     title: 'Subtotal',
                     value:
-                        '₦${cartManager.subtotal.toStringAsFixed(2)}',
+                        '₦${subtotal.toStringAsFixed(2)}',
                   ),
 
                   const SizedBox(height: 8),
@@ -171,14 +218,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
                   _SummaryRow(
                     title: 'Payment',
-                    value: _selectedPaymentMethod,
+                    value:
+                        _selectedPaymentMethod,
                   ),
 
                   const Divider(height: 28),
 
                   _SummaryRow(
                     title: 'Total',
-                    value: '₦${total.toStringAsFixed(2)}',
+                    value:
+                        '₦${total.toStringAsFixed(2)}',
                     isTotal: true,
                   ),
 
@@ -204,39 +253,48 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               _selectedDeliveryMethod,
                           paymentMethod:
                               _selectedPaymentMethod,
-                          items: List.from(cartManager.items),
-                          subtotal: cartManager.subtotal,
+                          items:
+                              List<CartItem>.from(
+                            checkoutItems,
+                          ),
+                          subtotal: subtotal,
                           deliveryFee: _deliveryFee,
                           total: total,
-                          createdAt: DateTime.now(),
+                          createdAt:
+                              DateTime.now(),
                         );
 
-                        // Save the order in OrderManager.
                         final orderManager =
-                            context.read<OrderManager>();
+    context.read<OrderManager>();
 
-                        await orderManager.addOrder(order);
+final navigator = Navigator.of(context);
 
-if (!context.mounted) {
+await orderManager.addOrder(order);
+
+if (!sheetContext.mounted) {
   return;
 }
 
-Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                OrderConfirmationScreen(
-                              orderId: order.id,
-                            ),
-                          ),
-                        );
+navigator.pop();
+
+if (!navigator.mounted) {
+  return;
+}
+
+navigator.push(
+  MaterialPageRoute(
+    builder: (_) => OrderConfirmationScreen(
+      orderId: order.id,
+    ),
+  ),
+);
                       },
                       child: const Text(
                         'Place Order',
                         style: TextStyle(
                           fontSize: 17,
-                          fontWeight: FontWeight.bold,
+                          fontWeight:
+                              FontWeight.bold,
                         ),
                       ),
                     ),
@@ -263,7 +321,8 @@ Navigator.pop(context);
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
             children: [
               const Text(
                 'Delivery Information',
@@ -280,7 +339,8 @@ Navigator.pop(context);
                 decoration: InputDecoration(
                   labelText: 'Full Name',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius:
+                        BorderRadius.circular(12),
                   ),
                 ),
                 validator: (value) {
@@ -297,11 +357,13 @@ Navigator.pop(context);
 
               TextFormField(
                 controller: _phoneController,
-                keyboardType: TextInputType.phone,
+                keyboardType:
+                    TextInputType.phone,
                 decoration: InputDecoration(
                   labelText: 'Phone Number',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius:
+                        BorderRadius.circular(12),
                   ),
                 ),
                 validator: (value) {
@@ -323,7 +385,8 @@ Navigator.pop(context);
                   hintText:
                       'Enter your full delivery address',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius:
+                        BorderRadius.circular(12),
                   ),
                 ),
                 maxLines: 3,
@@ -349,35 +412,41 @@ Navigator.pop(context);
 
               const SizedBox(height: 12),
 
-              Card(
-                child: RadioListTile<String>(
-                  value: 'Standard Delivery',
-                  groupValue: _selectedDeliveryMethod,
-                  onChanged: (value) {
-                    if (value == null) return;
+              RadioGroup<String>(
+                groupValue: _selectedDeliveryMethod,
+                onChanged: (value) {
+                  if (value == null) {
+                    return;
+                  }
 
-                    setState(() {
-                      _selectedDeliveryMethod = value;
-                    });
-                  },
-                  title: const Text('Standard Delivery'),
-                  subtitle: const Text('₦1,500'),
-                ),
-              ),
+                  setState(() {
+                    _selectedDeliveryMethod = value;
+                  });
+                },
+                child: Column(
+                  children: [
+                    Card(
+                      child: RadioListTile<String>(
+                        value: 'Standard Delivery',
+                        title: const Text(
+                          'Standard Delivery',
+                        ),
+                        subtitle:
+                            const Text('₦1,500'),
+                      ),
+                    ),
 
-              Card(
-                child: RadioListTile<String>(
-                  value: 'Express Delivery',
-                  groupValue: _selectedDeliveryMethod,
-                  onChanged: (value) {
-                    if (value == null) return;
-
-                    setState(() {
-                      _selectedDeliveryMethod = value;
-                    });
-                  },
-                  title: const Text('Express Delivery'),
-                  subtitle: const Text('₦3,000'),
+                    Card(
+                      child: RadioListTile<String>(
+                        value: 'Express Delivery',
+                        title: const Text(
+                          'Express Delivery',
+                        ),
+                        subtitle:
+                            const Text('₦3,000'),
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
@@ -393,41 +462,49 @@ Navigator.pop(context);
 
               const SizedBox(height: 12),
 
-              Card(
-                child: RadioListTile<String>(
-                  value: 'Cash on Delivery',
-                  groupValue: _selectedPaymentMethod,
-                  onChanged: (value) {
-                    if (value == null) return;
+              RadioGroup<String>(
+                groupValue: _selectedPaymentMethod,
+                onChanged: (value) {
+                  if (value == null) {
+                    return;
+                  }
 
-                    setState(() {
-                      _selectedPaymentMethod = value;
-                    });
-                  },
-                  secondary: const Icon(Icons.money),
-                  title: const Text('Cash on Delivery'),
-                  subtitle: const Text(
-                    'Pay when your order is delivered',
-                  ),
-                ),
-              ),
+                  setState(() {
+                    _selectedPaymentMethod = value;
+                  });
+                },
+                child: Column(
+                  children: [
+                    Card(
+                      child: RadioListTile<String>(
+                        value: 'Cash on Delivery',
+                        secondary:
+                            const Icon(Icons.money),
+                        title: const Text(
+                          'Cash on Delivery',
+                        ),
+                        subtitle: const Text(
+                          'Pay when your order is delivered',
+                        ),
+                      ),
+                    ),
 
-              Card(
-                child: RadioListTile<String>(
-                  value: 'Online Payment',
-                  groupValue: _selectedPaymentMethod,
-                  onChanged: (value) {
-                    if (value == null) return;
-
-                    setState(() {
-                      _selectedPaymentMethod = value;
-                    });
-                  },
-                  secondary: const Icon(Icons.credit_card),
-                  title: const Text('Online Payment'),
-                  subtitle: const Text(
-                    'Pay securely online',
-                  ),
+                    Card(
+                      child: RadioListTile<String>(
+                        value: 'Online Payment',
+                        secondary:
+                            const Icon(
+                          Icons.credit_card,
+                        ),
+                        title: const Text(
+                          'Online Payment',
+                        ),
+                        subtitle: const Text(
+                          'Pay securely online',
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
@@ -442,7 +519,8 @@ Navigator.pop(context);
                     'Review Order',
                     style: TextStyle(
                       fontSize: 17,
-                      fontWeight: FontWeight.bold,
+                      fontWeight:
+                          FontWeight.bold,
                     ),
                   ),
                 ),

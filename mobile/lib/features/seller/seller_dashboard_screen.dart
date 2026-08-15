@@ -3,16 +3,19 @@ import 'package:provider/provider.dart';
 
 import 'package:mobile/features/seller/add_product_screen.dart';
 import 'package:mobile/features/seller/manage_products_screen.dart';
+import 'package:mobile/features/seller/seller_orders_screen.dart';
+import 'package:mobile/managers/order_manager.dart';
 import 'package:mobile/managers/product_manager.dart';
 
 class SellerDashboardScreen extends StatelessWidget {
   const SellerDashboardScreen({super.key});
 
   @override
-Widget build(BuildContext context) {
-  final productManager = context.watch<ProductManager>();
+  Widget build(BuildContext context) {
+    final productManager = context.watch<ProductManager>();
+    final orderManager = context.watch<OrderManager>();
 
-  return Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: const Text('Seller Dashboard'),
       ),
@@ -58,7 +61,7 @@ Widget build(BuildContext context) {
                   child: _DashboardCard(
                     icon: Icons.shopping_bag_outlined,
                     title: 'Orders',
-                    value: '0',
+                    value: orderManager.orderCount.toString(),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -84,43 +87,89 @@ Widget build(BuildContext context) {
 
             const SizedBox(height: 12),
 
-            Card(
-              elevation: 0,
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Center(
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.receipt_long_outlined,
-                        size: 50,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurfaceVariant,
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'No orders yet',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'New customer orders will appear here.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
+            // RECENT ORDERS
+            if (orderManager.orders.isEmpty)
+              Card(
+                elevation: 0,
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.receipt_long_outlined,
+                          size: 50,
                           color: Theme.of(context)
                               .colorScheme
                               .onSurfaceVariant,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 12),
+                        const Text(
+                          'No orders yet',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'New customer orders will appear here.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
+              )
+            else
+              Column(
+                children: orderManager.orders
+                    .take(3)
+                    .map(
+                      (order) => Card(
+                        elevation: 0,
+                        margin: const EdgeInsets.only(
+                          bottom: 10,
+                        ),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            child: const Icon(
+                              Icons.shopping_bag_outlined,
+                            ),
+                          ),
+                          title: Text(
+                            order.customerName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text(
+                            '${order.items.length} item(s) • ${order.status}',
+                          ),
+                          trailing: Text(
+                            '₦${order.total.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    const SellerOrdersScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    )
+                    .toList(),
               ),
-            ),
 
             const SizedBox(height: 28),
 
@@ -142,7 +191,7 @@ Widget build(BuildContext context) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const AddProductScreen(),
+                    builder: (_) => const AddProductScreen(),
                   ),
                 );
               },
@@ -158,7 +207,8 @@ Widget build(BuildContext context) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const ManageProductsScreen(),
+                    builder: (_) =>
+                        const ManageProductsScreen(),
                   ),
                 );
               },
@@ -171,12 +221,11 @@ Widget build(BuildContext context) {
               icon: Icons.receipt_long_outlined,
               title: 'View Orders',
               onTap: () {
-                // Orders screen will be connected here next.
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Orders management will be connected next.',
-                    ),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        const SellerOrdersScreen(),
                   ),
                 );
               },
@@ -210,12 +259,15 @@ class _DashboardCard extends StatelessWidget {
             Icon(
               icon,
               size: 30,
-              color: Theme.of(context).colorScheme.primary,
+              color: Theme.of(context)
+                  .colorScheme
+                  .primary,
             ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
@@ -261,7 +313,9 @@ class _ActionButton extends StatelessWidget {
       child: ListTile(
         leading: Icon(
           icon,
-          color: Theme.of(context).colorScheme.primary,
+          color: Theme.of(context)
+              .colorScheme
+              .primary,
         ),
         title: Text(
           title,

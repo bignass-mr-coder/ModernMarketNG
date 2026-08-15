@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/models/order.dart';
 import 'package:provider/provider.dart';
+
 import 'package:mobile/managers/order_manager.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
   const OrderDetailsScreen({
     super.key,
     required this.order,
+    this.isSeller = false,
   });
 
   final Order order;
+  final bool isSeller;
 
   String _formatDate(DateTime date) {
     final day = date.day.toString().padLeft(2, '0');
@@ -30,12 +33,16 @@ class OrderDetailsScreen extends StatelessWidget {
     switch (currentOrder.status) {
       case 'Confirmed':
         return Colors.blue;
+
       case 'Shipped':
         return Colors.orange;
+
       case 'Delivered':
         return Colors.green;
+
       case 'Cancelled':
         return Colors.red;
+
       case 'Pending':
       default:
         return Theme.of(context).colorScheme.primary;
@@ -132,29 +139,103 @@ class OrderDetailsScreen extends StatelessWidget {
               order: currentOrder,
             ),
 
-            const SizedBox(height: 16),
+            // SELLER CONTROLS
+            if (isSeller) ...[
+              const SizedBox(height: 24),
 
-if (currentOrder.status == 'Pending') ...[
-  SizedBox(
-    width: double.infinity,
-    height: 50,
-    child: OutlinedButton(
-      onPressed: () {
-        context.read<OrderManager>().updateOrderStatus(
-              currentOrder.id,
-              'Cancelled',
-            );
-      },
-      child: const Text(
-        'Cancel Order',
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ),
-  ),
-],
+              const Text(
+                'Manage Order',
+                style: TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              if (currentOrder.status == 'Pending')
+                _SellerStatusButton(
+                  orderId: currentOrder.id,
+                  title: 'Confirm Order',
+                  icon: Icons.check_circle_outline,
+                  status: 'Confirmed',
+                ),
+
+              if (currentOrder.status == 'Confirmed')
+                _SellerStatusButton(
+                  orderId: currentOrder.id,
+                  title: 'Mark as Shipped',
+                  icon: Icons.local_shipping_outlined,
+                  status: 'Shipped',
+                ),
+
+              if (currentOrder.status == 'Shipped')
+                _SellerStatusButton(
+                  orderId: currentOrder.id,
+                  title: 'Mark as Delivered',
+                  icon: Icons.done_all,
+                  status: 'Delivered',
+                ),
+
+              if (currentOrder.status != 'Delivered' &&
+                  currentOrder.status != 'Cancelled') ...[
+                const SizedBox(height: 10),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      context
+                          .read<OrderManager>()
+                          .updateOrderStatus(
+                            currentOrder.id,
+                            'Cancelled',
+                          );
+                    },
+                    icon: const Icon(
+                      Icons.cancel_outlined,
+                    ),
+                    label: const Text(
+                      'Cancel Order',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+
+            // BUYER CANCEL BUTTON
+            if (!isSeller &&
+                currentOrder.status == 'Pending') ...[
+              const SizedBox(height: 16),
+
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton(
+                  onPressed: () {
+                    context
+                        .read<OrderManager>()
+                        .updateOrderStatus(
+                          currentOrder.id,
+                          'Cancelled',
+                        );
+                  },
+                  child: const Text(
+                    'Cancel Order',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+
             const SizedBox(height: 28),
 
             // CUSTOMER INFORMATION
@@ -290,7 +371,7 @@ if (currentOrder.status == 'Pending') ...[
 
             const SizedBox(height: 28),
 
-            // PRICE SUMMARY
+            // PAYMENT SUMMARY
             const Text(
               'Payment Summary',
               style: TextStyle(
@@ -333,6 +414,38 @@ if (currentOrder.status == 'Pending') ...[
             const SizedBox(height: 30),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _SellerStatusButton extends StatelessWidget {
+  const _SellerStatusButton({
+    required this.orderId,
+    required this.title,
+    required this.icon,
+    required this.status,
+  });
+
+  final String orderId;
+  final String title;
+  final IconData icon;
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: FilledButton.icon(
+        onPressed: () {
+          context.read<OrderManager>().updateOrderStatus(
+                orderId,
+                status,
+              );
+        },
+        icon: Icon(icon),
+        label: Text(title),
       ),
     );
   }
@@ -440,8 +553,7 @@ class _OrderStatusTimeline extends StatelessWidget {
       'Delivered',
     ];
 
-    final currentIndex =
-        statuses.indexOf(order.status);
+    final currentIndex = statuses.indexOf(order.status);
 
     return Card(
       elevation: 0,
