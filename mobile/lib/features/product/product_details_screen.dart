@@ -12,6 +12,8 @@ import 'package:mobile/widgets/product_reviews.dart';
 import 'package:mobile/widgets/product_specifications.dart';
 import 'package:mobile/widgets/seller_card.dart';
 import 'package:mobile/features/checkout/checkout_screen.dart';
+import 'package:mobile/managers/product_manager.dart';
+import 'package:mobile/widgets/product_card.dart';
 class ProductDetailsScreen extends StatefulWidget {
   final Product product;
   final String image;
@@ -33,11 +35,111 @@ class _ProductDetailsScreenState
     extends State<ProductDetailsScreen> {
   int quantity = 1;
 
+  String _imageForCategory(String category) {
+    switch (category) {
+      case 'Fashion':
+        return 'assets/images/kaftan.jpg';
+
+      case 'Electronics':
+        return 'assets/images/iphone13.jpg';
+
+      case 'Food':
+        return 'assets/images/food.jpg';
+
+      case 'Beauty':
+        return 'assets/images/beauty.jpg';
+
+      case 'Home':
+        return 'assets/images/chair.jpg';
+
+      case 'Agriculture':
+        return 'assets/images/agriculture.jpg';
+
+      default:
+        return 'assets/images/kaftan.jpg';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
 
     return Scaffold(
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            boxShadow: const [
+              BoxShadow(
+                blurRadius: 12,
+                offset: Offset(0, -3),
+                color: Colors.black12,
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: product.stockQuantity <= 0
+                      ? null
+                      : () {
+                          final cartItem = CartItem(
+                            productId: product.id,
+                            productName: product.name,
+                            price:
+                                '₦${product.price.toStringAsFixed(2)}',
+                            image: widget.image,
+                            quantity: quantity,
+                          );
+
+                          context
+                              .read<CartManager>()
+                              .addItem(cartItem);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Added to cart'),
+                            ),
+                          );
+                        },
+                  icon: const Icon(Icons.shopping_cart_outlined),
+                  label: const Text('Add to Cart'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: product.stockQuantity <= 0
+                      ? null
+                      : () {
+                          final buyNowItem = CartItem(
+                            productId: product.id,
+                            productName: product.name,
+                            price:
+                                '₦${product.price.toStringAsFixed(2)}',
+                            image: widget.image,
+                            quantity: quantity,
+                          );
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CheckoutScreen(
+                                buyNowItem: buyNowItem,
+                              ),
+                            ),
+                          );
+                        },
+                  icon: const Icon(Icons.flash_on),
+                  label: const Text('Buy Now'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
       appBar: AppBar(
         title: Text(product.name),
         actions: [
@@ -205,89 +307,76 @@ class _ProductDetailsScreenState
               ],
             ),
 
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton.icon(
-                  onPressed: product.stockQuantity <= 0
-                      ? null
-                      : () {
-                          final cartItem = CartItem(
-                            productId: product.id,
-                            productName: product.name,
-                            price:
-                                '₦${product.price.toStringAsFixed(2)}',
-                            image: widget.image,
-                            quantity: quantity,
-                          );
+            const SizedBox(height: 40),
 
-                          context
-                              .read<CartManager>()
-                              .addItem(cartItem);
+            const SizedBox(height: 28),
 
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Added to cart',
-                              ),
-                            ),
-                          );
-                        },
-                  icon: const Icon(
-                    Icons.shopping_cart,
-                  ),
-                  label: Text(
-                    product.stockQuantity <= 0
-                        ? 'Out of Stock'
-                        : 'Add to Cart',
-                  ),
-                ),
-              ),
-            ),
-
-            Padding(
-  padding: const EdgeInsets.symmetric(
-    horizontal: 20,
-  ),
-  child: SizedBox(
-    width: double.infinity,
-    height: 55,
-    child: FilledButton.icon(
-      onPressed: product.stockQuantity <= 0
-          ? null
-          : () {
-              final buyNowItem = CartItem(
-                productId: product.id,
-                productName: product.name,
-                price:
-                    '₦${product.price.toStringAsFixed(2)}',
-                image: widget.image,
-                quantity: quantity,
-              );
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => CheckoutScreen(
-                    buyNowItem: buyNowItem,
-                  ),
-                ),
-              );
-            },
-      icon: const Icon(
-        Icons.flash_on,
-      ),
-      label: const Text(
-        'Buy Now',
-      ),
+const Padding(
+  padding: EdgeInsets.symmetric(horizontal: 20),
+  child: Text(
+    'Related Products',
+    style: TextStyle(
+      fontSize: 22,
+      fontWeight: FontWeight.bold,
     ),
   ),
 ),
 
-            const SizedBox(height: 40),
+const SizedBox(height: 16),
+
+Consumer<ProductManager>(
+  builder: (context, productManager, child) {
+    final relatedProducts = productManager.products
+        .where(
+          (item) =>
+              item.id != product.id &&
+              item.category == product.category,
+        )
+        .toList();
+
+    if (relatedProducts.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 20,
+        ),
+        child: Text(
+          'No related products available.',
+          style: TextStyle(fontSize: 16),
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 380,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(
+          horizontal: 20,
+        ),
+        itemCount: relatedProducts.length,
+        separatorBuilder: (_, _) =>
+            const SizedBox(width: 12),
+        itemBuilder: (context, index) {
+          final relatedProduct = relatedProducts[index];
+
+          return SizedBox(
+            width: 190,
+            child: ProductCard(
+              product: relatedProduct,
+              image: _imageForCategory(
+                relatedProduct.category,
+              ),
+              rating: 4.8,
+            ),
+          );
+        },
+      ),
+    );
+  },
+),
+
+const SizedBox(height: 40),
           ],
         ),
       ),
