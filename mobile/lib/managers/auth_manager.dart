@@ -13,54 +13,75 @@ class AuthManager extends ChangeNotifier {
 
   bool get isLoggedIn => _currentUser != null;
 
-  Future<void> loadUser() async {
-    final preferences = await SharedPreferences.getInstance();
+  bool get isSeller => _currentUser?.isSeller ?? false;
 
-    final savedUser = preferences.getString(_userKey);
+  bool get isBuyer => _currentUser?.isBuyer ?? false;
+
+  Future<void> loadUser() async {
+    final preferences =
+        await SharedPreferences.getInstance();
+
+    final savedUser =
+        preferences.getString(_userKey);
 
     if (savedUser == null || savedUser.isEmpty) {
       return;
     }
 
     _currentUser = User.fromMap(
-      jsonDecode(savedUser) as Map<String, dynamic>,
+      jsonDecode(savedUser)
+          as Map<String, dynamic>,
     );
 
     notifyListeners();
   }
 
   Future<void> registerUser(User user) async {
-    final preferences = await SharedPreferences.getInstance();
-
-    await preferences.setString(
-      _userKey,
-      jsonEncode(user.toMap()),
-    );
-
-    _currentUser = user;
-
-    notifyListeners();
+    await _saveUser(user);
   }
 
   Future<void> loginUser(User user) async {
-    final preferences = await SharedPreferences.getInstance();
+    await _saveUser(user);
+  }
 
-    await preferences.setString(
-      _userKey,
-      jsonEncode(user.toMap()),
+  Future<void> updateUser(User updatedUser) async {
+    await _saveUser(updatedUser);
+  }
+
+  Future<void> makeSeller(String sellerId) async {
+    if (_currentUser == null) {
+      return;
+    }
+
+    final updatedUser = _currentUser!.copyWith(
+      role: 'seller',
+      sellerId: sellerId,
     );
 
-    _currentUser = user;
-
-    notifyListeners();
+    await _saveUser(updatedUser);
   }
 
   Future<void> logout() async {
-    final preferences = await SharedPreferences.getInstance();
+    final preferences =
+        await SharedPreferences.getInstance();
 
     await preferences.remove(_userKey);
 
     _currentUser = null;
+
+    notifyListeners();
+  }
+
+  Future<void> _saveUser(User user) async {
+    final preferences =
+        await SharedPreferences.getInstance();
+
+    await preferences.setString(
+      _userKey,
+      jsonEncode(user.toMap()),
+    );
+
+    _currentUser = user;
 
     notifyListeners();
   }

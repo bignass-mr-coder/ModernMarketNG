@@ -5,6 +5,8 @@ class User {
     required this.email,
     required this.phoneNumber,
     required this.createdAt,
+    this.role = 'buyer',
+    this.sellerId,
   });
 
   final String id;
@@ -13,6 +15,13 @@ class User {
   final String phoneNumber;
   final DateTime createdAt;
 
+  final String role;
+  final String? sellerId;
+
+  bool get isBuyer => role == 'buyer';
+
+  bool get isSeller => role == 'seller';
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -20,6 +29,8 @@ class User {
       'email': email,
       'phoneNumber': phoneNumber,
       'createdAt': createdAt.toIso8601String(),
+      'role': role,
+      'sellerId': sellerId,
     };
   }
 
@@ -32,6 +43,29 @@ class User {
       createdAt: DateTime.parse(
         map['createdAt'] as String,
       ),
+      role: map['role'] as String? ?? 'buyer',
+      sellerId: map['sellerId'] as String?,
+    );
+  }
+
+  User copyWith({
+    String? fullName,
+    String? email,
+    String? phoneNumber,
+    String? role,
+    String? sellerId,
+    bool clearSellerId = false,
+  }) {
+    return User(
+      id: id,
+      fullName: fullName ?? this.fullName,
+      email: email ?? this.email,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      createdAt: createdAt,
+      role: role ?? this.role,
+      sellerId: clearSellerId
+          ? null
+          : sellerId ?? this.sellerId,
     );
   }
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "277544011620",
+    "project_id": "modern-market-ng-b6b18",
+    "storage_bucket": "modern-market-ng-b6b18.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:277544011620:android:58cfe6f4d804272306dc71",
+        "android_client_info": {
+          "package_name": "com.example.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8AatIRCnRJ3x6OlZH49WgSEfwUZnkHTo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

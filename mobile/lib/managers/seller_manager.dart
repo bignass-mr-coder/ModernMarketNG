@@ -1,9 +1,13 @@
-import 'package:flutter/foundation.dart';
+import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:mobile/models/product.dart';
 import 'package:mobile/models/seller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SellerManager extends ChangeNotifier {
+  static const String _sellerKey = 'current_seller';
+
   Seller? _seller;
 
   final List<Product> _products = [];
@@ -14,20 +18,70 @@ class SellerManager extends ChangeNotifier {
 
   List<Product> get products => List.unmodifiable(_products);
 
-  void registerSeller(Seller seller) {
-    _seller = seller;
+  Future<void> loadSeller() async {
+    final preferences =
+        await SharedPreferences.getInstance();
+
+    final savedSeller =
+        preferences.getString(_sellerKey);
+
+    if (savedSeller == null ||
+        savedSeller.isEmpty) {
+      return;
+    }
+
+    _seller = Seller.fromMap(
+      jsonDecode(savedSeller)
+          as Map<String, dynamic>,
+    );
+
     notifyListeners();
   }
 
-  void updateSeller(Seller seller) {
+  Future<void> registerSeller(
+    Seller seller,
+  ) async {
     _seller = seller;
+
+    await _saveSeller();
+
     notifyListeners();
   }
 
-  void clearSeller() {
+  Future<void> updateSeller(
+    Seller seller,
+  ) async {
+    _seller = seller;
+
+    await _saveSeller();
+
+    notifyListeners();
+  }
+
+  Future<void> clearSeller() async {
+    final preferences =
+        await SharedPreferences.getInstance();
+
+    await preferences.remove(_sellerKey);
+
     _seller = null;
     _products.clear();
+
     notifyListeners();
+  }
+
+  Future<void> _saveSeller() async {
+    if (_seller == null) {
+      return;
+    }
+
+    final preferences =
+        await SharedPreferences.getInstance();
+
+    await preferences.setString(
+      _sellerKey,
+      jsonEncode(_seller!.toMap()),
+    );
   }
 
   void addProduct(Product product) {
@@ -39,6 +93,7 @@ class SellerManager extends ChangeNotifier {
     _products.removeWhere(
       (product) => product.id == productId,
     );
+
     notifyListeners();
   }
 
@@ -52,6 +107,7 @@ class SellerManager extends ChangeNotifier {
     }
 
     _products[index] = updatedProduct;
+
     notifyListeners();
   }
 }

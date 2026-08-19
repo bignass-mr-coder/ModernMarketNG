@@ -28,8 +28,8 @@ class ModernMarketApp extends StatelessWidget {
         ),
 
         ChangeNotifierProvider(
-          create: (_) => SellerManager(),
-        ),
+  create: (_) => SellerManager()..loadSeller(),
+),
 
         ChangeNotifierProvider(
           create: (_) => ProductManager()..loadProducts(),
