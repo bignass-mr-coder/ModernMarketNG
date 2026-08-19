@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:mobile/features/auth/register_screen.dart';
+import 'package:mobile/features/auth/forgot_password_screen.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -52,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 40),
 
               TextField(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "Email or Phone",
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.person),
@@ -65,8 +66,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   labelText: "Password",
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock),
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.lock),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
@@ -87,9 +88,16 @@ class _LoginScreenState extends State<LoginScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {},
-                  child: const Text("Forgot Password?"),
-                ),
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ForgotPasswordScreen(),
+      ),
+    );
+  },
+  child: const Text("Forgot Password?"),
+),
               ),
 
               const SizedBox(height: 20),
@@ -106,7 +114,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const Text("Don't have an account?"),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const RegisterScreen(),
+                        ),
+                      );
+                    },
                     child: const Text("Register"),
                   ),
                 ],

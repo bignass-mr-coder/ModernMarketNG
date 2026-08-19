@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:mobile/features/auth/login_screen.dart';
 import 'package:mobile/features/orders/orders_screen.dart';
 import 'package:mobile/features/seller/seller_dashboard_screen.dart';
 
@@ -35,7 +36,49 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 30),
+          const SizedBox(height: 8),
+
+          const Center(
+            child: Text(
+              'Sign in to manage your account',
+              style: TextStyle(
+                fontSize: 14,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // SIGN IN
+          Card(
+            child: ListTile(
+              leading: const Icon(
+                Icons.login_outlined,
+              ),
+              title: const Text(
+                'Sign In',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: const Text(
+                'Sign in or create your Modern Market NG account',
+              ),
+              trailing: const Icon(
+                Icons.chevron_right,
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const LoginScreen(),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: 12),
 
           // MY ORDERS
           Card(
