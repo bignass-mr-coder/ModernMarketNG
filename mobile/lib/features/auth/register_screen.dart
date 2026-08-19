@@ -56,7 +56,10 @@ class _RegisterScreenState
     createdAt: DateTime.now(),
   );
 
-  await context.read<AuthManager>().registerUser(user);
+  await context.read<AuthManager>().registerUser(
+      user,
+      password: _passwordController.text,
+    );
 
   if (!mounted) return;
 
