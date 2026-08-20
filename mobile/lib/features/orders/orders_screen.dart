@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:mobile/features/orders/order_details_screen.dart';
+import 'package:mobile/managers/auth_manager.dart';
 import 'package:mobile/managers/order_manager.dart';
 import 'package:mobile/models/order.dart';
 
@@ -10,7 +11,31 @@ class OrdersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final orders = context.watch<OrderManager>().orders;
+    final authManager = context.watch<AuthManager>();
+    final orderManager = context.watch<OrderManager>();
+
+    final currentUser = authManager.currentUser;
+
+    if (currentUser == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('My Orders'),
+        ),
+        body: const Center(
+          child: Text(
+            'Please sign in to view your orders.',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      );
+    }
+
+    final orders = orderManager.getOrdersForUser(
+      currentUser.id,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -44,7 +69,7 @@ class OrdersScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               itemCount: orders.length,
               separatorBuilder: (_, _) =>
-    const SizedBox(height: 12),
+                  const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final order = orders[index];
 
@@ -69,16 +94,12 @@ class _OrderCard extends StatelessWidget {
     switch (status) {
       case 'Confirmed':
         return Colors.blue;
-
       case 'Shipped':
         return Colors.orange;
-
       case 'Delivered':
         return Colors.green;
-
       case 'Cancelled':
         return Colors.red;
-
       case 'Pending':
       default:
         return Theme.of(context).colorScheme.primary;
@@ -117,13 +138,10 @@ class _OrderCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ORDER HEADER
               Row(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Expanded(
                     child: Text(
@@ -134,10 +152,8 @@ class _OrderCard extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
                         order.id,
@@ -149,13 +165,9 @@ class _OrderCard extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-
                       const SizedBox(height: 6),
-
-                      // STATUS BADGE
                       Container(
-                        padding:
-                            const EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           horizontal: 10,
                           vertical: 5,
                         ),
@@ -179,9 +191,7 @@ class _OrderCard extends StatelessWidget {
                   ),
                 ],
               ),
-
               const SizedBox(height: 12),
-
               Text(
                 _formatDate(order.createdAt),
                 style: TextStyle(
@@ -191,10 +201,7 @@ class _OrderCard extends StatelessWidget {
                       .onSurfaceVariant,
                 ),
               ),
-
               const SizedBox(height: 14),
-
-              // ITEMS
               Row(
                 children: [
                   const Icon(
@@ -207,10 +214,7 @@ class _OrderCard extends StatelessWidget {
                   ),
                 ],
               ),
-
               const SizedBox(height: 8),
-
-              // DELIVERY
               Row(
                 children: [
                   const Icon(
@@ -225,10 +229,7 @@ class _OrderCard extends StatelessWidget {
                   ),
                 ],
               ),
-
               const SizedBox(height: 8),
-
-              // PAYMENT
               Row(
                 children: [
                   const Icon(
@@ -243,10 +244,7 @@ class _OrderCard extends StatelessWidget {
                   ),
                 ],
               ),
-
               const Divider(height: 24),
-
-              // TOTAL
               Row(
                 mainAxisAlignment:
                     MainAxisAlignment.spaceBetween,
@@ -267,10 +265,7 @@ class _OrderCard extends StatelessWidget {
                   ),
                 ],
               ),
-
               const SizedBox(height: 12),
-
-              // VIEW DETAILS
               Row(
                 mainAxisAlignment:
                     MainAxisAlignment.end,
