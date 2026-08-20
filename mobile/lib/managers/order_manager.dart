@@ -58,6 +58,12 @@ class OrderManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  List<Order> getOrdersForUser(String userId) {
+    return _orders
+        .where((order) => order.userId == userId)
+        .toList();
+  }
+
   Order? getOrderById(String orderId) {
     for (final order in _orders) {
       if (order.id == orderId) {
@@ -84,6 +90,7 @@ class OrderManager extends ChangeNotifier {
 
     _orders[index] = Order(
       id: oldOrder.id,
+      userId: oldOrder.userId,
       customerName: oldOrder.customerName,
       phoneNumber: oldOrder.phoneNumber,
       address: oldOrder.address,

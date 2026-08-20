@@ -3,6 +3,7 @@ import 'package:mobile/models/cart_item.dart';
 class Order {
   const Order({
     required this.id,
+    required this.userId,
     required this.customerName,
     required this.phoneNumber,
     required this.address,
@@ -17,6 +18,7 @@ class Order {
   });
 
   final String id;
+  final String userId;
   final String customerName;
   final String phoneNumber;
   final String address;
@@ -32,6 +34,7 @@ class Order {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'userId': userId,
       'customerName': customerName,
       'phoneNumber': phoneNumber,
       'address': address,
@@ -49,6 +52,7 @@ class Order {
   factory Order.fromMap(Map<String, dynamic> map) {
     return Order(
       id: map['id'] as String,
+      userId: map['userId'] as String? ?? '',
       customerName: map['customerName'] as String,
       phoneNumber: map['phoneNumber'] as String,
       address: map['address'] as String,
@@ -64,7 +68,9 @@ class Order {
       subtotal: (map['subtotal'] as num).toDouble(),
       deliveryFee: (map['deliveryFee'] as num).toDouble(),
       total: (map['total'] as num).toDouble(),
-      createdAt: DateTime.parse(map['createdAt'] as String),
+      createdAt: DateTime.parse(
+        map['createdAt'] as String,
+      ),
       status: map['status'] as String? ?? 'Pending',
     );
   }

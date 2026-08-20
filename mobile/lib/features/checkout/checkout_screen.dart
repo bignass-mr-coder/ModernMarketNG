@@ -6,7 +6,7 @@ import 'package:mobile/models/order.dart';
 import 'package:mobile/features/checkout/order_confirmation_screen.dart';
 import 'package:mobile/managers/cart_manager.dart';
 import 'package:mobile/managers/order_manager.dart';
-
+import 'package:mobile/managers/auth_manager.dart';
 class CheckoutScreen extends StatefulWidget {
   final CartItem? buyNowItem;
 
@@ -241,10 +241,30 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         final orderId =
                             'MMNG-${DateTime.now().millisecondsSinceEpoch}';
 
-                        final order = Order(
-                          id: orderId,
-                          customerName:
-                              _nameController.text.trim(),
+                       final authManager = context.read<AuthManager>();
+final currentUser = authManager.currentUser;
+
+if (currentUser == null) {
+  if (!sheetContext.mounted) {
+    return;
+  }
+
+  Navigator.of(sheetContext).pop();
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text('Please sign in before placing an order.'),
+    ),
+  );
+
+  return;
+}
+
+final order = Order(
+  id: orderId,
+  userId: currentUser.id,
+  customerName:
+      _nameController.text.trim(),
                           phoneNumber:
                               _phoneController.text.trim(),
                           address:
