@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -13,24 +14,80 @@ class _ForgotPasswordScreenState
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
 
+  bool _isLoading = false;
+
   @override
   void dispose() {
     _emailController.dispose();
     super.dispose();
   }
 
-  void _sendResetLink() {
+  Future<void> _sendResetLink() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Password reset instructions sent successfully.',
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(
+        email: _emailController.text.trim(),
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Password reset email sent. Check your inbox.',
+          ),
         ),
-      ),
-    );
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
+      String message;
+
+      switch (e.code) {
+        case 'user-not-found':
+          message = 'No account was found with this email.';
+          break;
+        case 'invalid-email':
+          message = 'Please enter a valid email address.';
+          break;
+        case 'too-many-requests':
+          message =
+              'Too many requests. Please try again later.';
+          break;
+        default:
+          message =
+              'Unable to send reset email. Please try again.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Something went wrong. Please try again.',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -46,7 +103,8 @@ class _ForgotPasswordScreenState
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment:
+                  CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 40),
 
@@ -80,7 +138,8 @@ class _ForgotPasswordScreenState
 
                 TextFormField(
                   controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
+                  keyboardType:
+                      TextInputType.emailAddress,
                   decoration: const InputDecoration(
                     labelText: 'Email Address',
                     hintText: 'example@email.com',
@@ -108,13 +167,25 @@ class _ForgotPasswordScreenState
                 SizedBox(
                   height: 52,
                   child: FilledButton.icon(
-                    onPressed: _sendResetLink,
-                    icon: const Icon(
-                      Icons.send_outlined,
-                    ),
-                    label: const Text(
-                      'Send Reset Link',
-                      style: TextStyle(
+                    onPressed:
+                        _isLoading ? null : _sendResetLink,
+                    icon: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child:
+                                CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.send_outlined,
+                          ),
+                    label: Text(
+                      _isLoading
+                          ? 'Sending...'
+                          : 'Send Reset Link',
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -125,9 +196,11 @@ class _ForgotPasswordScreenState
                 const SizedBox(height: 16),
 
                 TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
+                  onPressed: _isLoading
+                      ? null
+                      : () {
+                          Navigator.pop(context);
+                        },
                   child: const Text(
                     'Back to Sign In',
                   ),
